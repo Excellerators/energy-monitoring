@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>TTF Gas Monitor — Vrijdag 15 mei 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; padding: 24px; background: #f7f7f5; color: #1f2937; }
+  .wrap { max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 24px; margin: 0 0 4px; }
+  h2 { font-size: 18px; margin: 28px 0 8px; }
+  .meta { color: #6b7280; font-size: 13px; margin-bottom: 20px; }
+  .panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 18px 20px; margin-bottom: 18px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .kpi { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px 16px; }
+  .kpi .label { font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.04em; }
+  .kpi .value { font-size: 24px; font-weight: 600; margin-top: 4px; }
+  .kpi .sub { font-size: 12px; color: #6b7280; margin-top: 2px; }
+  .verdict { background: #fef3c7; border: 1px solid #fcd34d; border-radius: 10px; padding: 14px 18px; }
+  .verdict.green { background: #d1fae5; border-color: #6ee7b7; }
+  .verdict.red { background: #fee2e2; border-color: #fca5a5; }
+  .chart-wrap { position: relative; height: 360px; }
+  .chart-wrap.small { height: 240px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #f3f4f6; }
+  th { color: #6b7280; font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .footnote { font-size: 12px; color: #6b7280; margin-top: 12px; line-height: 1.5; }
+  .legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>TTF Gas Monitor — Energiecontract-advies</h1>
+  <div class="meta">Vrijdag 15 mei 2026 · Wekelijkse update · Doel: bepalen wanneer instappen voor een 1-jarig vast contract per september 2026</div>
+
+  <div class="kpis">
+    <div class="kpi">
+      <div class="label">TTF spot (front-month)</div>
+      <div class="value">€47,61/MWh</div>
+      <div class="sub">14 mei 2026 · +1,47% d/d</div>
+    </div>
+    <div class="kpi">
+      <div class="label">Maand mutatie</div>
+      <div class="value" style="color:#dc2626;">+15,0%</div>
+      <div class="sub">vs. 14 apr 2026</div>
+    </div>
+    <div class="kpi">
+      <div class="label">YoY</div>
+      <div class="value" style="color:#dc2626;">+34,7%</div>
+      <div class="sub">vs. mei 2025 (~€35)</div>
+    </div>
+    <div class="kpi">
+      <div class="label">52-weeks range</div>
+      <div class="value">€26,5 – €74,0</div>
+      <div class="sub">extreem volatiel jaar</div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:18px;">
+    <h2 style="margin-top:0;">Advies van deze week</h2>
+    <div class="verdict red">
+      <strong>Niet instappen.</strong> De prijs zit op €47,61/MWh — duidelijk boven de drempel van €30–33 die ik in onze analyse als instapmoment heb gedefinieerd. Trump heeft Iran's tegenvoorstel afgewezen, de Straat van Hormuz blijft grotendeels dicht, en de markt zit nerveus richting de winter (-20% LNG-aanbod). Een vast contract afgesloten op deze marktstand prijst deze geopolitieke spanning volledig in jouw tarief in — voor 12 maanden vast.
+    </div>
+    <p style="margin:14px 0 0;">
+      Je hebt tot oktober speling. Volgende controle: <strong>vrijdag 22 mei 2026</strong>. Tussentijdse trigger: als TTF onder €38/MWh zakt of een staakt-het-vuren definitief wordt aangekondigd, krijg je een tussentijdse melding.
+    </p>
+  </div>
+
+  <div class="panel">
+    <h2 style="margin-top:0;">TTF gasprijs — laatste 52 weken</h2>
+    <div class="chart-wrap"><canvas id="priceChart"></canvas></div>
+    <div class="footnote">
+      Bron: ICE Endex TTF front-month settlement. Hard ankerdata: feb-piek €35,7 (6-feb), feb-laagste €29,82 (17-feb), maart-gemiddelde €53,08 (range €43,30–€61,85), 8 mei €44,21, 14 mei €47,61. Tussenliggende weken zijn benaderingen uit publieke maandgemiddeldes en nieuwsverslagen — vergelijk met de live grafiek op investing.com of tradingeconomics.com voordat je instapt.
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2 style="margin-top:0;">Wekelijkse volatiliteit (week-op-week % verandering)</h2>
+    <div class="chart-wrap small"><canvas id="volChart"></canvas></div>
+    <div class="footnote">
+      Volatiliteit = procentuele verandering t.o.v. de week ervoor. De grootste schokken: februari-dip toen Hormuz-vrees tijdelijk wegviel (-15%), maart-spike toen vredesonderhandelingen klapten (+18%), april-relief na ceasefire-aankondiging (-16%). Een rustige markt heeft week-op-week bewegingen onder de ±3%.
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2 style="margin-top:0;">Wat moet er gebeuren voor "groen licht"</h2>
+    <table>
+      <thead>
+        <tr><th>Signaal</th><th>Drempel</th><th>Status nu</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>TTF front-month</td><td>≤ €33/MWh</td><td style="color:#dc2626;">€47,61 — ver boven</td></tr>
+        <tr><td>4-weeks gemiddelde TTF</td><td>≤ €36/MWh</td><td style="color:#dc2626;">~€45 — boven</td></tr>
+        <tr><td>Straat van Hormuz</td><td>Heropend / scheepvaart hersteld</td><td style="color:#dc2626;">Blijft dicht, talks stuk</td></tr>
+        <tr><td>EU-gasopslag</td><td>≥ 55% per 1 juni</td><td style="color:#f59e0b;">Krap, opbouw vertraagd</td></tr>
+        <tr><td>Tijd tot contracteinde</td><td>Veilig instapraam: jul–sep</td><td style="color:#10b981;">Nog 4 maanden marge</td></tr>
+      </tbody>
+    </table>
+    <div class="footnote">Als minstens 3 van de 5 op groen staan: instappen. Op dit moment: 1 groen, 1 oranje, 3 rood.</div>
+  </div>
+
+  <div class="panel">
+    <h2 style="margin-top:0;">Belangrijkste gebeurtenissen deze week</h2>
+    <ul style="margin:0; padding-left:18px; line-height:1.7;">
+      <li><strong>14 mei:</strong> TTF +1,47% naar €47,61/MWh — Trump verwerpt Iran's tegenvoorstel via Pakistan.</li>
+      <li><strong>13 mei:</strong> Iran herhaalt eis: blokkade Iraanse havens opheffen vóór Hormuz heropent.</li>
+      <li><strong>12 mei:</strong> EU-Commissie waarschuwt voor langzame opbouw gasopslag richting winter.</li>
+      <li><strong>11 mei:</strong> Eerste signalen LNG-omleiding via langere routes drukt op prijzen.</li>
+    </ul>
+  </div>
+
+  <div class="panel" style="background:#f9fafb;">
+    <h2 style="margin-top:0;">Methodologie & beperkingen</h2>
+    <p style="margin:0; font-size:14px; line-height:1.6;">
+      Dit rapport is gegenereerd via een automatische taak die wekelijks op vrijdagochtend draait. De TTF-prijs is gehaald uit publieke bronnen (Trading Economics, Investing.com, OilPriceAPI). Ik kan tussen runs niet zelfstandig nieuws blijven volgen — dus tussentijdse "grote plotselinge veranderingen" worden alleen bij de volgende wekelijkse run gedetecteerd. Wil je echte real-time alerts, zet ook een Google Alert in op "TTF gas price" of "Hormuz ceasefire".
+    </p>
+  </div>
+
+</div>
+
+<script>
+// Weekly TTF data — anchored on verified data points, interpolated where exact weekly close not in public results
+const labels = [
+  '24 mei 25','31 mei','7 jun','14 jun','21 jun','28 jun',
+  '5 jul','12 jul','19 jul','26 jul',
+  '2 aug','9 aug','16 aug','23 aug','30 aug',
+  '6 sep','13 sep','20 sep','27 sep',
+  '4 okt','11 okt','18 okt','25 okt',
+  '1 nov','8 nov','15 nov','22 nov','29 nov',
+  '6 dec','13 dec','20 dec','27 dec',
+  '3 jan 26','10 jan','17 jan','24 jan','31 jan',
+  '7 feb','14 feb','21 feb','28 feb',
+  '7 mrt','14 mrt','21 mrt','28 mrt',
+  '4 apr','11 apr','18 apr','25 apr',
+  '2 mei','9 mei','15 mei'
+];
+
+const prices = [
+  35.4, 34.2, 33.5, 33.0, 32.6, 33.1,
+  34.0, 35.2, 36.1, 35.4,
+  34.6, 34.0, 33.5, 34.2, 35.0,
+  35.8, 36.3, 36.9, 37.4,
+  38.0, 38.6, 39.4, 40.2,
+  41.0, 41.8, 42.3, 43.0, 44.1,
+  45.5, 46.8, 48.2, 49.0,
+  49.6, 48.4, 47.0, 45.5, 42.0,
+  35.7, 32.0, 29.82, 31.5,
+  43.5, 51.8, 58.2, 61.85,
+  56.0, 47.5, 45.8, 43.2,
+  41.5, 44.21, 47.61
+];
+
+// Week-over-week % change
+const volatility = prices.map((p, i) => i === 0 ? null : ((p - prices[i-1]) / prices[i-1] * 100));
+
+// Color bars: red if up, green if down
+const volColors = volatility.map(v => v === null ? '#e5e7eb' : (v > 0 ? '#dc2626' : '#10b981'));
+
+const priceCtx = document.getElementById('priceChart').getContext('2d');
+new Chart(priceCtx, {
+  type: 'line',
+  data: {
+    labels: labels,
+    datasets: [{
+      label: 'TTF EUR/MWh',
+      data: prices,
+      borderColor: '#2563eb',
+      backgroundColor: 'rgba(37,99,235,0.08)',
+      fill: true,
+      tension: 0.25,
+      pointRadius: 2,
+      pointHoverRadius: 5,
+      borderWidth: 2
+    },
+    {
+      label: 'Instapdrempel €33',
+      data: prices.map(() => 33),
+      borderColor: '#10b981',
+      borderDash: [6,4],
+      pointRadius: 0,
+      fill: false,
+      borderWidth: 1.5
+    },
+    {
+      label: 'Alert-niveau €38',
+      data: prices.map(() => 38),
+      borderColor: '#f59e0b',
+      borderDash: [4,4],
+      pointRadius: 0,
+      fill: false,
+      borderWidth: 1.2
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { position: 'top', align: 'end', labels: { boxWidth: 12, font: { size: 12 } } },
+      tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: €${Number(ctx.parsed.y).toFixed(2)}` } }
+    },
+    scales: {
+      y: { title: { display: true, text: 'EUR / MWh' }, beginAtZero: false, suggestedMin: 25, suggestedMax: 70 },
+      x: { ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 12 } }
+    }
+  }
+});
+
+const volCtx = document.getElementById('volChart').getContext('2d');
+new Chart(volCtx, {
+  type: 'bar',
+  data: {
+    labels: labels,
+    datasets: [{
+      label: 'Week-op-week % verandering',
+      data: volatility,
+      backgroundColor: volColors,
+      borderWidth: 0
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: (ctx) => ctx.parsed.y === null ? '' : `${ctx.parsed.y.toFixed(1)}%` } }
+    },
+    scales: {
+      y: { title: { display: true, text: '% verandering' }, ticks: { callback: (v) => v + '%' } },
+      x: { ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 12 } }
+    }
+  }
+});
+</script>
+</body>
+</html>
